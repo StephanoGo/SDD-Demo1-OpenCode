@@ -1,0 +1,32 @@
+@model PedidosPriority.Models.CreateOrderRequest
+@{
+    ViewData["Title"] = "Registrar Pedido";
+}
+
+<h1>Registrar Pedido</h1>
+
+<section class="card card-form" aria-label="Registro de pedidos">
+    <form asp-controller="Pedidos" asp-action="Create" method="post" novalidate>
+        <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+        <div class="form-group">
+            <label asp-for="CustomerId"></label>
+            <input asp-for="CustomerId" class="form-control" type="number" step="1" min="1" />
+            <span asp-validation-for="CustomerId" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Subtotal"></label>
+            <input asp-for="Subtotal" class="form-control money-input" type="number" step="0.01" min="0.01" />
+            <span asp-validation-for="Subtotal" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="ShippingCost"></label>
+            <input asp-for="ShippingCost" class="form-control money-input" type="number" step="0.01" min="0" />
+            <span asp-validation-for="ShippingCost" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Agregar a la cola</button>
+    </form>
+</section>

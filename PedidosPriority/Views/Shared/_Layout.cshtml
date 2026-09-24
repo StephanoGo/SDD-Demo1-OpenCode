@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PedidosPriority</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a class="navbar-brand" asp-area="" asp-controller="Pedidos" asp-action="Index">PedidosPriority</a>
+            <ul class="nav-menu">
+                <li><a asp-area="" asp-controller="Pedidos" asp-action="Index">Registrar Pedido</a></li>
+                <li><a asp-area="" asp-controller="Entregapedidos" asp-action="Index">Entrega de Pedidos</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">&copy; 2026 - PedidosPriority</div>
+    </footer>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

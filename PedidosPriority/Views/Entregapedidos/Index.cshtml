@@ -1,0 +1,68 @@
+@model IEnumerable<PedidosPriority.Models.Order>
+@{
+    ViewData["Title"] = "Entrega de Pedidos";
+}
+
+<h1>Pedidos en Cola</h1>
+
+@if (!Model.Any())
+{
+    <div class="card card-table">
+        <p class="empty-state">No hay pedidos pendientes en la cola.</p>
+    </div>
+}
+else
+{
+    <div class="card card-table">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Turno</th>
+                <th>Cliente</th>
+                <th>Teléfono</th>
+                <th>Dirección</th>
+                <th>Subtotal</th>
+                <th>Costo de envío</th>
+                <th>Total</th>
+                <th>Prioridad</th>
+                <th>Envío</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                var esAlta = order.PriorityLevel == 1;
+                <tr>
+                    <td class="turno">@order.OrderId</td>
+                    <td>@order.CustomerFullName</td>
+                    <td>@order.CustomerPhone</td>
+                    <td>@order.DeliveryAddress</td>
+                    <td class="text-right">@order.Subtotal.ToString("N2")</td>
+                    <td class="text-right">@order.ShippingCost.ToString("N2")</td>
+                    <td class="total text-right"><strong>@order.Total.ToString("N2")</strong></td>
+                    <td>
+                        @if (esAlta)
+                        {
+                            <span class="badge badge-alta">ALTA</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-baja">BAJA</span>
+                        }
+                    </td>
+                    <td>
+                        @if (esAlta)
+                        {
+                            <span>Envío Express</span>
+                        }
+                        else
+                        {
+                            <span>Envío Gratis</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    </div>
+}

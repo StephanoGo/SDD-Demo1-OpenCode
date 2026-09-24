@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="PedidosPriority.Tests/PedidosPriority.Tests.csproj" />
+  <Project Path="PedidosPriority/PedidosPriority.csproj" />
+</Solution>
