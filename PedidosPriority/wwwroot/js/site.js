@@ -471,9 +471,45 @@
         dispatchButton.type = 'button';
         dispatchButton.className = 'btn-dispatch';
         dispatchButton.appendChild(document.createTextNode('Despachar'));
+        dispatchButton.addEventListener('click', function () {
+            dispatchOrder(order, dispatchButton);
+        });
         row.appendChild(cellWith(null, [dispatchButton]));
 
         return row;
+    }
+
+    function dispatchOrder(order, button) {
+        if (button.disabled) {
+            return;
+        }
+
+        button.disabled = true;
+
+        fetch('/api/pedidos/despachar/' + order.OrderId, { method: 'POST' })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('No se pudo despachar el pedido.');
+                }
+
+                return response.json();
+            })
+            .then(function () {
+                var row = button.closest('tr');
+                row.classList.add('row-dispatch-out');
+
+                setTimeout(function () {
+                    queueData = queueData.filter(function (item) {
+                        return item.OrderId !== order.OrderId;
+                    });
+                    window.pedidosColaData = queueData;
+                    filterAndRender();
+                }, 300);
+            })
+            .catch(function () {
+                button.disabled = false;
+                alert('No se pudo despachar el pedido. Inténtalo de nuevo.');
+            });
     }
 
     function renderPackingQueue(pedidos) {

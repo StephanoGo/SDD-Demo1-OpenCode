@@ -19,4 +19,23 @@ public sealed class EntregapedidosController : Controller
 
         return View(queue);
     }
+
+    [HttpPost]
+    [Route("api/pedidos/despachar/{id}")]
+    public async Task<IActionResult> Despachar(int id)
+    {
+        if (id <= 0)
+        {
+            return BadRequest(new { success = false, orderId = id });
+        }
+
+        var dispatched = await _orderService.DispatchOrderAsync(id);
+
+        if (!dispatched)
+        {
+            return BadRequest(new { success = false, orderId = id });
+        }
+
+        return Ok(new { success = true, orderId = id });
+    }
 }

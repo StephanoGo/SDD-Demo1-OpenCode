@@ -133,6 +133,25 @@ public sealed class OrderServiceTests
     }
 
     [Fact]
+    public async Task DispatchOrderAsync_DevuelveVerdadero_CuandoElPedidoExiste()
+    {
+        _repository.Seed(new Order { OrderId = 5, PriorityLevel = 1, RegistrationDate = new DateTime(2026, 9, 28, 9, 0, 0) });
+
+        var result = await _service.DispatchOrderAsync(5);
+
+        Assert.True(result);
+        Assert.DoesNotContain(_repository.GetPackingQueue(), o => o.OrderId == 5);
+    }
+
+    [Fact]
+    public async Task DispatchOrderAsync_DevuelveFalso_CuandoElPedidoNoExiste()
+    {
+        var result = await _service.DispatchOrderAsync(999);
+
+        Assert.False(result);
+    }
+
+    [Fact]
     public void GetOrderDetails_DevuelveDatosDelRepositorio()
     {
         var expected = new OrderDetailsViewModel

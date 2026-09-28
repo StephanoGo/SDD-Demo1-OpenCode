@@ -63,6 +63,11 @@ public sealed class OrderService : IOrderService
         return _repository.InsertWithDetails(order, itemList);
     }
 
+    public Task<bool> DispatchOrderAsync(int orderId)
+    {
+        return _repository.DispatchOrderAsync(orderId);
+    }
+
     public OrderDetailsViewModel GetOrderDetails(int orderId)
     {
         return _repository.GetOrderDetails(orderId);

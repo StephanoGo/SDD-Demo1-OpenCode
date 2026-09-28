@@ -35,5 +35,18 @@ public sealed class FakeOrderRepository : IOrderRepository
         return _details ?? new OrderDetailsViewModel { OrderId = orderId };
     }
 
+    public Task<bool> DispatchOrderAsync(int orderId)
+    {
+        var order = _queue.FirstOrDefault(o => o.OrderId == orderId);
+
+        if (order is null)
+        {
+            return Task.FromResult(false);
+        }
+
+        _queue.Remove(order);
+        return Task.FromResult(true);
+    }
+
     public IEnumerable<Order> GetPackingQueue() => _queue.ToList();
 }

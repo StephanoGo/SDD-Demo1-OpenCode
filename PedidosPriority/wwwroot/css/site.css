@@ -923,3 +923,9 @@ h2 {
 .text-center {
   text-align: center;
 }
+
+/* ============ Spec 003: Despachar (fade-out de fila) ============ */
+.row-dispatch-out {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}

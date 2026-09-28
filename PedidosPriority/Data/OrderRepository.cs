@@ -67,6 +67,28 @@ public sealed class OrderRepository : IOrderRepository
         return orderId;
     }
 
+    public async Task<bool> DispatchOrderAsync(int orderId)
+    {
+        using var connection = new SqlConnection(_connectionString);
+        using var command = new SqlCommand("dbo.sp_DispatchOrder", connection)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        command.Parameters.Add(new SqlParameter("@OrderId", SqlDbType.Int) { Value = orderId });
+
+        try
+        {
+            await connection.OpenAsync();
+            await command.ExecuteNonQueryAsync();
+            return true;
+        }
+        catch (SqlException)
+        {
+            return false;
+        }
+    }
+
     public OrderDetailsViewModel GetOrderDetails(int orderId)
     {
         var details = new OrderDetailsViewModel();
