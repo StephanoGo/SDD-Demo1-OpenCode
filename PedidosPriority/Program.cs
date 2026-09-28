@@ -4,6 +4,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<PedidosPriority.Data.IOrderRepository, PedidosPriority.Data.OrderRepository>();
 builder.Services.AddScoped<PedidosPriority.Services.IOrderService, PedidosPriority.Services.OrderService>();
+builder.Services.AddScoped<PedidosPriority.Data.ICatalogRepository, PedidosPriority.Data.CatalogRepository>();
+builder.Services.AddScoped<PedidosPriority.Services.ICatalogService, PedidosPriority.Services.CatalogService>();
 
 var app = builder.Build();
 

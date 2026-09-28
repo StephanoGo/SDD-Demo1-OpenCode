@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using PedidosPriority.Models;
 using PedidosPriority.Services;
@@ -6,11 +7,15 @@ namespace PedidosPriority.Controllers;
 
 public sealed class PedidosController : Controller
 {
-    private readonly IOrderService _orderService;
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
-    public PedidosController(IOrderService orderService)
+    private readonly IOrderService _orderService;
+    private readonly ICatalogService _catalogService;
+
+    public PedidosController(IOrderService orderService, ICatalogService catalogService)
     {
         _orderService = orderService;
+        _catalogService = catalogService;
     }
 
     public IActionResult Index()
@@ -29,7 +34,7 @@ public sealed class PedidosController : Controller
 
         try
         {
-            _orderService.CreateOrder(request.CustomerId, request.Subtotal, request.ShippingCost);
+            _orderService.CreateOrder(request.CustomerId, request.ShippingCost, request.Items);
         }
         catch (ArgumentException ex)
         {
@@ -38,5 +43,36 @@ public sealed class PedidosController : Controller
         }
 
         return RedirectToAction("Index", "Entregapedidos");
+    }
+
+    [HttpGet]
+    public IActionResult Detalle(int id)
+    {
+        if (id <= 0)
+        {
+            return View(new OrderDetailsViewModel());
+        }
+
+        var details = _orderService.GetOrderDetails(id);
+
+        return View(details);
+    }
+
+    [HttpGet]
+    public JsonResult Clientes()
+    {
+        return Json(_catalogService.GetActiveCustomers(), JsonOptions);
+    }
+
+    [HttpGet]
+    public JsonResult Categorias()
+    {
+        return Json(_catalogService.GetCategories(), JsonOptions);
+    }
+
+    [HttpGet]
+    public JsonResult Productos(int? categoriaId)
+    {
+        return Json(_catalogService.GetProductsByCategory(categoriaId), JsonOptions);
     }
 }

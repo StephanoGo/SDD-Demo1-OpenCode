@@ -3,30 +3,110 @@
     ViewData["Title"] = "Registrar Pedido";
 }
 
-<h1>Registrar Pedido</h1>
+<div class="page-head">
+    <h1>Registrar Pedido</h1>
+    <p class="page-subtitle">Selecciona el cliente, arma el pedido con el catálogo y agrégalo a la cola.</p>
+</div>
 
-<section class="card card-form" aria-label="Registro de pedidos">
-    <form asp-controller="Pedidos" asp-action="Create" method="post" novalidate>
+<section class="card card-form card-form-wide" aria-label="Registro de pedidos">
+    <form asp-controller="Pedidos" asp-action="Create" method="post" id="form-orden" novalidate>
         <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
 
-        <div class="form-group">
+        <div class="form-field">
             <label asp-for="CustomerId"></label>
-            <input asp-for="CustomerId" class="form-control" type="number" step="1" min="1" />
+            <div class="input-group">
+                <svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 21c0-4 3.6-6 8-6s8 2 8 6" />
+                </svg>
+                <input type="text" id="buscar-cliente" class="form-control with-icon" placeholder="Busca por ID, nombre o apellido..." autocomplete="off" aria-label="Buscar cliente" />
+            </div>
+            <div class="cust-suggest" id="cliente-sugerencias" hidden></div>
+            <span id="cliente-seleccionado" class="cliente-seleccionado" hidden></span>
+            <input type="hidden" asp-for="CustomerId" id="customer-id-hidden" />
+            <span class="input-help">Escribe y elige un cliente activo del listado.</span>
             <span asp-validation-for="CustomerId" class="text-danger"></span>
         </div>
 
-        <div class="form-group">
-            <label asp-for="Subtotal"></label>
-            <input asp-for="Subtotal" class="form-control money-input" type="number" step="0.01" min="0.01" />
-            <span asp-validation-for="Subtotal" class="text-danger"></span>
+        <div class="form-field">
+            <label>Catálogo</label>
+            <div class="form-row">
+                <select id="categoria-select" class="form-control" aria-label="Categoría">
+                    <option value="">Cargando categorías...</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <select id="producto-select" class="form-control" aria-label="Producto" disabled>
+                    <option value="">Primero elige una categoría</option>
+                </select>
+                <input type="number" id="cantidad-input" class="form-control input-qty" min="1" step="1" value="1" aria-label="Cantidad" />
+                <button type="button" id="btn-agregar-item" class="btn btn-outline">+ Agregar</button>
+            </div>
+            <span class="preset-note">Agrega productos del catálogo; el subtotal se calcula automáticamente.</span>
         </div>
 
-        <div class="form-group">
+        <div class="form-field">
+            <label>Productos agregados</label>
+            <div class="items-card">
+                <table class="table items-table" id="items-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cant.</th>
+                            <th class="text-right">P. Unitario</th>
+                            <th class="text-right">Subtotal</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-body"></tbody>
+                </table>
+            </div>
+            <div class="items-summary">
+                <span class="items-summary-label">Subtotal</span>
+                <strong id="subtotal-general" class="items-summary-value">S/ 0.00</strong>
+            </div>
+        </div>
+
+        <div class="form-field">
             <label asp-for="ShippingCost"></label>
-            <input asp-for="ShippingCost" class="form-control money-input" type="number" step="0.01" min="0" />
+            <div class="shipping-presets">
+                <button type="button" class="shipping-preset" data-shipping-preset="0">
+                    <svg class="preset-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                    Gratis (S/ 0)
+                </button>
+                <button type="button" class="shipping-preset" data-shipping-preset="15.00">
+                    <svg class="preset-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M1.5 8h13v9h-13z" />
+                        <path d="M14.5 11h4l3.5 3.5V17h-7.5" />
+                        <circle cx="6" cy="19" r="1.6" />
+                        <circle cx="16.5" cy="19" r="1.6" />
+                    </svg>
+                    Express (S/ 15.00)
+                </button>
+            </div>
+            <div class="input-group">
+                <span class="input-prefix">S/</span>
+                <input asp-for="ShippingCost" class="form-control money-input with-prefix" type="number" step="0.01" min="0" placeholder="0.00" />
+            </div>
+            <span class="preset-note">El envío con costo asigna prioridad ALTA en la cola.</span>
             <span asp-validation-for="ShippingCost" class="text-danger"></span>
         </div>
 
-        <button type="submit" class="btn btn-primary">Agregar a la cola</button>
+        <div class="total-box">
+            <span class="total-label">TOTAL ESTIMADO</span>
+            <strong id="TotalEstimado">S/ 0.00</strong>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">+ Agregar a la cola</button>
     </form>
 </section>
+
+<script>
+    window.catalogUrls = {
+        clientes: '@Url.Action("Clientes", "Pedidos")',
+        categorias: '@Url.Action("Categorias", "Pedidos")',
+        productos: '@Url.Action("Productos", "Pedidos")'
+    };
+</script>

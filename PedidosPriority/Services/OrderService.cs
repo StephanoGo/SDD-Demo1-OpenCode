@@ -12,21 +12,43 @@ public sealed class OrderService : IOrderService
         _repository = repository;
     }
 
-    public int CreateOrder(int customerId, decimal subtotal, decimal shippingCost)
+    public int CreateOrder(int customerId, decimal shippingCost, IEnumerable<OrderDetailRequest> items)
     {
         if (customerId <= 0)
         {
             throw new ArgumentException("El identificador del cliente es inválido.", nameof(customerId));
         }
 
-        if (subtotal <= 0)
-        {
-            throw new ArgumentException("El subtotal debe ser mayor a cero.", nameof(subtotal));
-        }
-
         if (shippingCost < 0)
         {
             throw new ArgumentException("El costo de envío no puede ser negativo.", nameof(shippingCost));
+        }
+
+        var itemList = items?.ToList() ?? new List<OrderDetailRequest>();
+
+        if (itemList.Count == 0)
+        {
+            throw new ArgumentException("Debe agregarse al menos un producto al pedido.", nameof(items));
+        }
+
+        foreach (var item in itemList)
+        {
+            if (item.Quantity <= 0)
+            {
+                throw new ArgumentException("La cantidad debe ser mayor a cero.", nameof(items));
+            }
+
+            if (item.UnitPrice < 0)
+            {
+                throw new ArgumentException("El precio unitario no puede ser negativo.", nameof(items));
+            }
+        }
+
+        var subtotal = itemList.Sum(i => i.Quantity * i.UnitPrice);
+
+        if (subtotal <= 0)
+        {
+            throw new ArgumentException("El subtotal debe ser mayor a cero.", nameof(items));
         }
 
         var order = new Order
@@ -38,7 +60,12 @@ public sealed class OrderService : IOrderService
             PriorityLevel = shippingCost > 0 ? (byte)1 : (byte)2
         };
 
-        return _repository.Insert(order);
+        return _repository.InsertWithDetails(order, itemList);
+    }
+
+    public OrderDetailsViewModel GetOrderDetails(int orderId)
+    {
+        return _repository.GetOrderDetails(orderId);
     }
 
     public IEnumerable<Order> GetPackingQueue()

@@ -1,68 +1,49 @@
 @model IEnumerable<PedidosPriority.Models.Order>
 @{
-    ViewData["Title"] = "Entrega de Pedidos";
+    ViewData["Title"] = "Pedidos en Cola";
 }
 
-<h1>Pedidos en Cola</h1>
+<div class="page-head">
+    <h1>Pedidos en Cola</h1>
+    <p class="page-subtitle">Pedidos activos en preparación según prioridad y orden de registro.</p>
+</div>
 
-@if (!Model.Any())
-{
-    <div class="card card-table">
-        <p class="empty-state">No hay pedidos pendientes en la cola.</p>
+<div class="toolbar">
+    <div class="search-box">
+        <svg class="icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="M21 21l-4.35-4.35" />
+        </svg>
+        <input type="search" id="filtro-cola" placeholder="Buscar cliente o dirección..." aria-label="Buscar cliente o dirección" />
     </div>
-}
-else
-{
-    <div class="card card-table">
-    <table class="table">
+    <button type="button" id="limpiar-filtros" class="btn btn-outline">Limpiar filtros</button>
+</div>
+
+<div class="card card-table">
+    <table class="table" id="tabla-cola">
         <thead>
             <tr>
                 <th>Turno</th>
                 <th>Cliente</th>
-                <th>Teléfono</th>
+                <th>Número telefónico</th>
                 <th>Dirección</th>
                 <th>Subtotal</th>
-                <th>Costo de envío</th>
+                <th>Envío</th>
                 <th>Total</th>
                 <th>Prioridad</th>
-                <th>Envío</th>
+                <th>Tipo de entrega</th>
+                <th>Acción</th>
             </tr>
         </thead>
-        <tbody>
-            @foreach (var order in Model)
-            {
-                var esAlta = order.PriorityLevel == 1;
-                <tr>
-                    <td class="turno">@order.OrderId</td>
-                    <td>@order.CustomerFullName</td>
-                    <td>@order.CustomerPhone</td>
-                    <td>@order.DeliveryAddress</td>
-                    <td class="text-right">@order.Subtotal.ToString("N2")</td>
-                    <td class="text-right">@order.ShippingCost.ToString("N2")</td>
-                    <td class="total text-right"><strong>@order.Total.ToString("N2")</strong></td>
-                    <td>
-                        @if (esAlta)
-                        {
-                            <span class="badge badge-alta">ALTA</span>
-                        }
-                        else
-                        {
-                            <span class="badge badge-baja">BAJA</span>
-                        }
-                    </td>
-                    <td>
-                        @if (esAlta)
-                        {
-                            <span>Envío Express</span>
-                        }
-                        else
-                        {
-                            <span>Envío Gratis</span>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
+        <tbody id="queue-body"></tbody>
+        <tfoot>
+            <tr class="table-footer">
+                <td colspan="10">Mostrando <span id="queue-count">0</span> pedidos activos en preparación | Tiempo estimado medio: 18 mins</td>
+            </tr>
+        </tfoot>
     </table>
-    </div>
-}
+</div>
+
+<script>
+    window.pedidosColaData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+</script>

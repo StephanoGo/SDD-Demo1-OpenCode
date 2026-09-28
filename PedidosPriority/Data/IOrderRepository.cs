@@ -4,6 +4,7 @@ namespace PedidosPriority.Data;
 
 public interface IOrderRepository
 {
-    int Insert(Order order);
+    int InsertWithDetails(Order order, IEnumerable<OrderDetailRequest> items);
     IEnumerable<Order> GetPackingQueue();
+    OrderDetailsViewModel GetOrderDetails(int orderId);
 }

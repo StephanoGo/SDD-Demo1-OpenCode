@@ -1,0 +1,101 @@
+@model PedidosPriority.Models.OrderDetailsViewModel
+@{
+    ViewData["Title"] = "Detalle de la Orden";
+    var subtotalMostrado = Model.Subtotal > 0 ? Model.Subtotal : Model.Lines.Sum(l => l.LineTotal);
+    var totalMostrado = Model.Total > 0 ? Model.Total : subtotalMostrado + Model.ShippingCost;
+}
+
+<div class="page-head">
+    <h1>Detalle de la Orden</h1>
+    <p class="page-subtitle">@(Model.HasHeader ? $"Pedido #{Model.OrderId}" : "Consulta sin resultados.")</p>
+</div>
+
+@if (!Model.HasHeader)
+{
+    <section class="card text-center">
+        <p class="empty-state">No se encontró una orden con el identificador solicitado.</p>
+        <a class="btn btn-outline" asp-controller="Entregapedidos" asp-action="Index">← Volver a la cola</a>
+    </section>
+}
+else
+{
+    <section class="card card-detail" aria-label="Detalle de la orden">
+        <div class="detail-head">
+            <div>
+                <h2 class="detail-title">Pedido #@Model.OrderId</h2>
+                <p class="detail-date">Registrado el @Model.RegistrationDate.ToString("dd/MM/yyyy 'a las' HH:mm")</p>
+            </div>
+            @if (Model.PriorityLevel == 1)
+            {
+                <span class="priority-pill alta"><span class="dot"></span>ALTA</span>
+            }
+            else
+            {
+                <span class="priority-pill baja"><span class="dot"></span>BAJA</span>
+            }
+        </div>
+
+        <div class="detail-grid">
+            <div class="detail-item">
+                <span class="detail-label">Cliente</span>
+                <span class="detail-value">@Model.CustomerFullName</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Teléfono</span>
+                <span class="detail-value">@Model.CustomerPhone</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Dirección</span>
+                <span class="detail-value">@Model.DeliveryAddress</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Email</span>
+                <span class="detail-value">@Model.Email</span>
+            </div>
+        </div>
+
+        <h3 class="detail-section-title">Productos</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio unitario</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var line in Model.Lines)
+                {
+                    <tr>
+                        <td>@line.ProductName</td>
+                        <td>@line.Quantity</td>
+                        <td class="text-right">S/ @line.UnitPrice.ToString("N2")</td>
+                        <td class="text-right">S/ @line.LineTotal.ToString("N2")</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr class="table-footer">
+                    <td colspan="2"></td>
+                    <td class="text-right">Subtotal:</td>
+                    <td class="text-right">S/ @subtotalMostrado.ToString("N2")</td>
+                </tr>
+                <tr class="table-footer">
+                    <td colspan="2"></td>
+                    <td class="text-right">Envío:</td>
+                    <td class="text-right">S/ @Model.ShippingCost.ToString("N2")</td>
+                </tr>
+                <tr class="table-footer total-footer">
+                    <td colspan="2"></td>
+                    <td class="text-right">Total:</td>
+                    <td class="text-right">S/ @totalMostrado.ToString("N2")</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="detail-actions">
+            <a class="btn btn-outline" asp-controller="Entregapedidos" asp-action="Index">← Volver a la cola</a>
+        </div>
+    </section>
+}
